@@ -9,9 +9,7 @@ import { useGLTF } from '@react-three/drei'
 import { useSpring, animated } from '@react-spring/three'
 
 export default function Card(props) {
-  const texture = useTexture("/textures/" + props.card.file) 
-  const [position , setPosition] = useState(props.position)
-  const [rotation , setRotation] = useState(props.rotation)
+  const texture = useTexture(props.card.value ? "/textures/" + props.card.value + "_of_" +  props.card.suit + ".png" : "/textures/2_of_clubs.png") 
   const [transform, api] = useSpring(() => ({ position: props.position, rotation: props.rotation }))
   const { nodes, materials } = useGLTF('/models/card.glb')
   const moveToDealer = () => {
@@ -26,9 +24,13 @@ export default function Card(props) {
     api.start({ to: [{ position: [-0.7, -2, 0], rotation: [0, 0, -Math.PI * 0.5] }, 
       { position: [-0.7 , -4, 0], rotation: [0, 0, Math.PI * 0.5]},
         { position: [0.7 - props.i * 0.01, -4, 0], rotation: [0, 0, Math.PI * 0.5]},
-        { position: [0.7 - props.playerIndex *0.1, -4, 14 - props.playerIndex], rotation: [props.card.double ? Math.PI *0.5 : 0, 0 ,Math.PI * 0.5]}
+        { position: [0.7 - props.playerIndex[props.card.deck] *0.1, -4 + props.card.deck *6 , 14 - props.playerIndex[props.card.deck]], rotation: [props.card.double ? Math.PI *0.5 : 0, 0 ,Math.PI * 0.5]},
     ] }
     )}
+  const split = () => {
+    api.start({ to:{ position: [0.7 - props.playerIndex[props.card.deck] *0.1, -4 + props.card.deck * 6, 14 - props.playerIndex[props.card.deck]], rotation: [props.card.double ? Math.PI * 0.5 : 0, 0 ,Math.PI * 0.5]}})
+  
+  }
   // useEffect(() => {
   //   api.start({ position: props.position, rotation: props.rotation })
   // }, [position, rotation])
@@ -40,6 +42,11 @@ export default function Card(props) {
     moveToPlayer()
     }
   }, [props.index])
+  useEffect(() => {
+    if(props.card.played){
+    split()
+  }
+  }, [props.card.deck])
   return (
     <animated.group {...props} dispose={null} rotation={transform.rotation} position={transform.position}>
       <group scale={[1, 0.109, 1.438]}>

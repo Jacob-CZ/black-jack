@@ -1,27 +1,60 @@
+import { card } from "@/app//[gameId]/page"
 import { NextResponse } from "next/server"
-
-export async function POST(){
-    const res = await fetch("https://api.random.org/json-rpc/4/invoke",{
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            "jsonrpc": "2.0",
-            "method": "generateIntegers",
-            "params": {
-                "apiKey": "248cff88-d0f8-4b78-b009-0d110d291d4c",
-                "n": 10,
-                "min": 1,
-                "max": 10,
-                "replacement": true,
-                "base": 10,
-                "pregeneratedRandomization": null
-            },
-            "id": 17196
+const cards : card[] = []
+const suits: ("hearts" | "diamonds" | "clubs" | "spades")[] = ["hearts", "diamonds", "clubs", "spades"];
+const values: any[] = [2, 3, 4, 5, 6, 7, 8, 9, 10, "jack", "queen", "king", "ace"];
+interface Card {
+    suit: "hearts" | "diamonds" |  "clubs" | "spades" | null
+    value: number | "ace" | "jack" | "queen" | "king" | null
+}
+const deck: Card[] = suits.flatMap(suit => values.map(value => ({ suit, value })));
+export async function POST() {
+	const res = await fetch("https://api.random.org/json-rpc/4/invoke", {
+		method: "POST",
+		headers: {
+			"Content-Type": "application/json",
+		},
+		body: JSON.stringify({
+			jsonrpc: "2.0",
+			method: "generateDecimalFractions",
+			params: {
+				apiKey: "02a6893d-aec9-4c58-a692-41395874c737",
+				n: 52*4,
+				decimalPlaces: 4,
+				replacement: true,
+				pregeneratedRandomization: null,
+			},
+			id: 796,
+		}),
+	})
+    console.log(res)
+	const data = await res.json()
+	const randoms = data.result.random.data
+    if (!randoms) {
+        return NextResponse.json({ message: "No randoms" }, { status: 500 })
+    }
+	const array = Array.from({ length: 52 }, (_, i) => i + 1)
+	const fourDeck = Array.from({ length: 4 }, () => [...array]).flat()
+	const shuffleDeck = () => {
+		for (let i = 0; i < fourDeck.length-1; i++) {
+			let shuffle = Math.floor(randoms[i] * fourDeck.length)
+			let temp = fourDeck[i]
+			fourDeck[i] = fourDeck[shuffle]
+			fourDeck[shuffle] = temp
+		}
+	}
+    shuffleDeck()
+    fourDeck.forEach((card, index) => {
+        cards.push({
+            double: false,
+            deck: 0,
+            suit: deck[card-1].suit,
+            value: deck[card-1].value,
+            played: false,
+            to: null,
+            index: index,
         })
     })
-    const data = await res.json()
-    console.log(data.result.random.data)
-    return NextResponse.json({message: "Hello World"}, {status: 200})
+    console.log(cards)
+	return NextResponse.json({ deck: fourDeck }, { status: 200 })
 }
