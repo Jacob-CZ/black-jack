@@ -23,7 +23,6 @@ export default function Card(props) {
   const moveToPlayer = () => {
     api.start({ to: [{ position: [-0.7, -2, 0], rotation: [0, 0, -Math.PI * 0.5] }, 
       { position: [-0.7 , -4, 0], rotation: [0, 0, Math.PI * 0.5]},
-        { position: [0.7 - props.i * 0.01, -4, 0], rotation: [0, 0, Math.PI * 0.5]},
         { position: [0.7 - props.playerIndex[props.card.deck] *0.1, -4 + props.card.deck *6 , 14 - props.playerIndex[props.card.deck]], rotation: [props.card.double ? Math.PI *0.5 : 0, 0 ,Math.PI * 0.5]},
     ] }
     )}
