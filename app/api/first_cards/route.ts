@@ -1,3 +1,4 @@
+import { card } from "@/app/[gameId]/page";
 import { createClient } from "@/utils/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -17,6 +18,13 @@ export async function GET(req: NextRequest) {
         return NextResponse.json({ message: "error" }, { status: 500 });
     }
     
-    const returnDeck = deck.slice(0, 3)
+    const returnDeck:card[] = deck.slice(0, 3)
+    returnDeck.forEach(card => {
+        card.played = true
+        card.to = "player"
+        card.deck = 0
+        card.double = false
+    })
+    returnDeck[1].to = "dealer"
     return NextResponse.json(returnDeck, { status: 200 });
 }
